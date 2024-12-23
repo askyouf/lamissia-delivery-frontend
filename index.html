@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная - Доставка еды</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Lamissia Delivery</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="templates/menu.html">Меню</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="templates/promotions.html">Акции</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="templates/cart.html" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-cart"></i> Корзина <span class="cart-count">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="container py-5">
+        <!-- Промо блоки -->
+        <div class="row g-4 mb-5">
+            <!-- Главный промо блок -->
+            <div class="col-lg-6">
+                <div class="promo-card promo-primary h-100">
+                    <div class="promo-content">
+                        <i class="bi bi-percent display-1 mb-4"></i>
+                        <h2 class="display-6 fw-bold mb-3">Скидка 20%</h2>
+                        <p class="fs-5 mb-4">На первый заказ для новых клиентов</p>
+                        <a href="templates/menu.html" class="btn btn-light btn-lg">Заказать</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Дополнительные промо блоки -->
+            <div class="col-lg-6">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="promo-card promo-secondary h-100">
+                            <div class="promo-content">
+                                <i class="bi bi-clock display-5 mb-3"></i>
+                                <h3 class="h4 fw-bold mb-2">Быстрая доставка</h3>
+                                <p>От 30 минут</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="promo-card promo-secondary h-100">
+                            <div class="promo-content">
+                                <i class="bi bi-geo-alt display-5 mb-3"></i>
+                                <h3 class="h4 fw-bold mb-2">Зона доставки</h3>
+                                <p>По всему городу</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="promo-card promo-secondary h-100">
+                            <div class="promo-content">
+                                <i class="bi bi-gift display-5 mb-3"></i>
+                                <h3 class="h4 fw-bold mb-2">Бонусная программа</h3>
+                                <p>Копите баллы и получайте скидки</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Промокод -->
+        <div class="promo-code-card text-center p-4 mb-5">
+            <h2>Используйте промокод для скидки 10%</h2>
+            <div class="promo-code-wrapper">
+                <code id="promoCode" class="fs-4">WELCOME10</code>
+                <button onclick="copyPromoCode()" class="btn btn-sm btn-outline-secondary ms-2">
+                    <i class="bi bi-clipboard"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Контакты</h5>
+                    <p>Телефон: +7 (XXX) XXX-XX-XX</p>
+                    <p>Email: info@lamissia.ru</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Время работы</h5>
+                    <p>Ежедневно с 10:00 до 23:00</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Следите за нами</h5>
+                    <div class="social-links">
+                        <a href="#" class="me-2"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="me-2"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="me-2"><i class="bi bi-telegram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    <script>
+        function copyPromoCode() {
+            const promoCode = document.getElementById('promoCode');
+            navigator.clipboard.writeText(promoCode.textContent).then(() => {
+                alert('Промокод скопирован!');
+            });
+        }
+    </script>
+</body>
+</html>
