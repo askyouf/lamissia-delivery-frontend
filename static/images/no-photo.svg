@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="180" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Определение градиентов -->
+    <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f1f3f5;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ff922b;stop-opacity:0.15" />
+            <stop offset="100%" style="stop-color:#ff922b;stop-opacity:0.08" />
+        </linearGradient>
+    </defs>
+
+    <!-- Фон -->
+    <rect width="240" height="180" fill="url(#bgGradient)"/>
+    
+    <!-- Декоративные элементы -->
+    <path d="M0 0 L240 180" stroke="url(#accentGradient)" stroke-width="180" stroke-linecap="round"/>
+    
+    <!-- Центральная композиция -->
+    <g transform="translate(120,90)" fill="#495057" opacity="0.4">
+        <!-- Минималистичная иконка в виде абстрактных линий -->
+        <path d="M-20,-15 L20,-15 M-15,-20 L15,-20 M-10,0 A10,10 0 1,0 10,0 A10,10 0 1,0 -10,0" 
+              stroke="#495057" 
+              stroke-width="2"
+              stroke-linecap="round"
+              fill="none"/>
+    </g>
+    
+    <!-- Современный текст -->
+    <text x="120" y="120" 
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif" 
+          font-size="12" 
+          fill="#495057" 
+          text-anchor="middle" 
+          font-weight="400" 
+          letter-spacing="0.5px"
+          opacity="1.0">
+        Изображение скоро появится
+    </text>
+</svg>

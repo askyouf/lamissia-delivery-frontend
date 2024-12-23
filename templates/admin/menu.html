@@ -1,0 +1,389 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Управление меню - Админ-панель{% endblock %}
+
+{% block header_title %}Управление меню{% endblock %}
+
+{% block header_actions %}
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoryModal">
+    <i class="fas fa-plus me-2"></i>Добавить категорию
+</button>
+<button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#dishModal">
+    <i class="fas fa-plus me-2"></i>Добавить блюдо
+</button>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/dragula@3.7.3/dist/dragula.min.css" rel="stylesheet">
+<style>
+    .menu-category {
+        background: white;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    .category-header {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .category-title {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    .dish-list {
+        min-height: 50px;
+        padding: 1rem;
+    }
+    .dish-item {
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        cursor: move;
+    }
+    .dish-item:last-child {
+        margin-bottom: 0;
+    }
+    .dish-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: contain;
+        margin-right: 1rem;
+        background-color: #f8f9fa;
+    }
+    .dish-info {
+        flex-grow: 1;
+    }
+    .dish-title {
+        margin: 0 0 0.5rem 0;
+        font-weight: 500;
+    }
+    .dish-price {
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+    .dish-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .gu-mirror {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Categories and Dishes -->
+    {% for category in categories %}
+    <div class="menu-category" data-category-id="{{ category.id }}">
+        <div class="category-header">
+            <h5 class="category-title">
+                <i class="fas fa-{{ category.icon }} me-2"></i>
+                {{ category.name }}
+            </h5>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-primary" onclick="editCategory({{ category.id }})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory({{ category.id }})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="dish-list" data-category-id="{{ category.id }}">
+            {% for dish in dishes if dish.category_id == category.id %}
+            <div class="dish-item" data-dish-id="{{ dish.id }}">
+                <img src="{{ url_for('static', filename='uploads/dishes/' + dish.photo) if dish.photo else url_for('static', filename='img/no-image.png') }}" 
+                     alt="{{ dish.name }}" class="dish-image">
+                <div class="dish-info">
+                    <h6 class="dish-title">{{ dish.name }}</h6>
+                    <p class="dish-description text-muted mb-2">{{ dish.description }}</p>
+                    <div class="dish-price">{{ "%.2f"|format(dish.price) }} ₽</div>
+                </div>
+                <div class="dish-actions">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editDish({{ dish.id }})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteDish({{ dish.id }})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Category Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить категорию</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <input type="hidden" name="id" id="categoryId">
+                    <div class="mb-3">
+                        <label class="form-label">Название</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Описание</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Иконка</label>
+                        <input type="text" class="form-control" name="icon" value="utensils">
+                        <small class="text-muted">Название иконки из Font Awesome</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Порядок</label>
+                        <input type="number" class="form-control" name="order" value="0">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" name="is_active" checked>
+                        <label class="form-check-label">Активна</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="saveCategory()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dish Modal -->
+<div class="modal fade" id="dishModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить блюдо</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dishForm">
+                    <input type="hidden" name="id" id="dishId">
+                    <div class="mb-3">
+                        <label class="form-label">Название</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Описание</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Цена</label>
+                        <input type="number" class="form-control" name="price" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Категория</label>
+                        <select class="form-select" name="category_id" required>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Фото</label>
+                        <input type="file" class="form-control" name="photo" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Порядок</label>
+                        <input type="number" class="form-control" name="order" value="0">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" name="is_available" checked>
+                        <label class="form-check-label">Доступно</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="saveDish()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/dragula@3.7.3/dist/dragula.min.js"></script>
+<script>
+    // Initialize dragula for dish sorting
+    dragula([...document.querySelectorAll('.dish-list')], {
+        moves: function(el, container, handle) {
+            return !handle.classList.contains('btn');
+        }
+    }).on('drop', function(el) {
+        updateDishOrder(el.parentNode);
+    });
+
+    // Category functions
+    function editCategory(id) {
+        fetch(`/admin/api/categories/${id}`)
+            .then(response => response.json())
+            .then(category => {
+                const form = document.getElementById('categoryForm');
+                form.querySelector('[name="id"]').value = category.id;
+                form.querySelector('[name="name"]').value = category.name;
+                form.querySelector('[name="description"]').value = category.description;
+                form.querySelector('[name="icon"]').value = category.icon;
+                form.querySelector('[name="order"]').value = category.order;
+                form.querySelector('[name="is_active"]').checked = category.is_active;
+                
+                const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
+                modal.show();
+            });
+    }
+
+    function saveCategory() {
+        const form = document.getElementById('categoryForm');
+        const formData = new FormData(form);
+        const id = formData.get('id');
+        
+        fetch(`/admin/api/categories${id ? `/${id}` : ''}`, {
+            method: id ? 'PUT' : 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            location.reload();
+        })
+        .catch(error => {
+            showToast(error.message, 'error');
+        });
+    }
+
+    function deleteCategory(id) {
+        confirmAction('Удалить категорию?', 'Все блюда в этой категории также будут удалены', () => {
+            fetch(`/admin/api/categories/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                location.reload();
+            })
+            .catch(error => {
+                showToast(error.message, 'error');
+            });
+        });
+    }
+
+    // Dish functions
+    function editDish(id) {
+        fetch(`/admin/api/dishes/${id}`)
+            .then(response => response.json())
+            .then(dish => {
+                const form = document.getElementById('dishForm');
+                form.querySelector('[name="id"]').value = dish.id;
+                form.querySelector('[name="name"]').value = dish.name;
+                form.querySelector('[name="description"]').value = dish.description;
+                form.querySelector('[name="price"]').value = dish.price;
+                form.querySelector('[name="category_id"]').value = dish.category_id;
+                form.querySelector('[name="order"]').value = dish.order;
+                form.querySelector('[name="is_available"]').checked = dish.is_available;
+                
+                const modal = new bootstrap.Modal(document.getElementById('dishModal'));
+                modal.show();
+            });
+    }
+
+    function saveDish() {
+        const form = document.getElementById('dishForm');
+        const formData = new FormData(form);
+        const id = formData.get('id');
+        
+        fetch(`/admin/api/dishes${id ? `/${id}` : ''}`, {
+            method: id ? 'PUT' : 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            location.reload();
+        })
+        .catch(error => {
+            showToast(error.message, 'error');
+        });
+    }
+
+    function deleteDish(id) {
+        confirmAction('Удалить блюдо?', 'Это действие нельзя отменить', () => {
+            fetch(`/admin/api/dishes/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                location.reload();
+            })
+            .catch(error => {
+                showToast(error.message, 'error');
+            });
+        });
+    }
+
+    function updateDishOrder(container) {
+        const categoryId = container.dataset.categoryId;
+        const dishes = [...container.children].map((el, index) => ({
+            id: el.dataset.dishId,
+            order: index
+        }));
+        
+        fetch(`/admin/api/categories/${categoryId}/dishes/order`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ dishes })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            showToast('Порядок блюд обновлен');
+        })
+        .catch(error => {
+            showToast(error.message, 'error');
+        });
+    }
+
+    // Reset forms when modals are closed
+    document.getElementById('categoryModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('categoryForm').reset();
+        document.getElementById('categoryId').value = '';
+    });
+
+    document.getElementById('dishModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('dishForm').reset();
+        document.getElementById('dishId').value = '';
+    });
+</script>
+{% endblock %}

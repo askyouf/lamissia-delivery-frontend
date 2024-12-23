@@ -1,0 +1,201 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Настройки - Админ-панель{% endblock %}
+
+{% block header_title %}Настройки{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-section {
+        background: white;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    .settings-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    .settings-body {
+        padding: 1.5rem;
+    }
+    .setting-item {
+        margin-bottom: 1.5rem;
+    }
+    .setting-item:last-child {
+        margin-bottom: 0;
+    }
+    .setting-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .setting-description {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <form id="settingsForm" class="row">
+        <!-- General Settings -->
+        <div class="col-md-6 mb-4">
+            <div class="settings-section">
+                <div class="settings-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>
+                        Общие настройки
+                    </h5>
+                </div>
+                <div class="settings-body">
+                    {% for setting in general_settings %}
+                    <div class="setting-item">
+                        <div class="setting-label">{{ setting.name }}</div>
+                        {% if setting.description %}
+                        <div class="setting-description">{{ setting.description }}</div>
+                        {% endif %}
+                        
+                        {% if setting.type == 'text' %}
+                        <input type="text" class="form-control" 
+                               name="{{ setting.key }}" 
+                               value="{{ setting.value }}"
+                               placeholder="{{ setting.placeholder }}">
+                        
+                        {% elif setting.type == 'number' %}
+                        <input type="number" class="form-control" 
+                               name="{{ setting.key }}" 
+                               value="{{ setting.value }}"
+                               step="{{ setting.step }}"
+                               min="{{ setting.min }}"
+                               max="{{ setting.max }}">
+                        
+                        {% elif setting.type == 'textarea' %}
+                        <textarea class="form-control" 
+                                  name="{{ setting.key }}" 
+                                  rows="3"
+                                  placeholder="{{ setting.placeholder }}">{{ setting.value }}</textarea>
+                        
+                        {% elif setting.type == 'select' %}
+                        <select class="form-select" name="{{ setting.key }}">
+                            {% for option in setting.options %}
+                            <option value="{{ option.value }}" 
+                                    {% if option.value == setting.value %}selected{% endif %}>
+                                {{ option.label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        
+                        {% elif setting.type == 'checkbox' %}
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" 
+                                   name="{{ setting.key }}" 
+                                   {% if setting.value %}checked{% endif %}>
+                            <label class="form-check-label">{{ setting.label }}</label>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Settings -->
+        <div class="col-md-6 mb-4">
+            <div class="settings-section">
+                <div class="settings-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-truck me-2"></i>
+                        Настройки доставки
+                    </h5>
+                </div>
+                <div class="settings-body">
+                    {% for setting in delivery_settings %}
+                    <div class="setting-item">
+                        <div class="setting-label">{{ setting.name }}</div>
+                        {% if setting.description %}
+                        <div class="setting-description">{{ setting.description }}</div>
+                        {% endif %}
+                        
+                        {% if setting.type == 'text' %}
+                        <input type="text" class="form-control" 
+                               name="{{ setting.key }}" 
+                               value="{{ setting.value }}"
+                               placeholder="{{ setting.placeholder }}">
+                        
+                        {% elif setting.type == 'number' %}
+                        <input type="number" class="form-control" 
+                               name="{{ setting.key }}" 
+                               value="{{ setting.value }}"
+                               step="{{ setting.step }}"
+                               min="{{ setting.min }}"
+                               max="{{ setting.max }}">
+                        
+                        {% elif setting.type == 'textarea' %}
+                        <textarea class="form-control" 
+                                  name="{{ setting.key }}" 
+                                  rows="3"
+                                  placeholder="{{ setting.placeholder }}">{{ setting.value }}</textarea>
+                        
+                        {% elif setting.type == 'select' %}
+                        <select class="form-select" name="{{ setting.key }}">
+                            {% for option in setting.options %}
+                            <option value="{{ option.value }}" 
+                                    {% if option.value == setting.value %}selected{% endif %}>
+                                {{ option.label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        
+                        {% elif setting.type == 'checkbox' %}
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" 
+                                   name="{{ setting.key }}" 
+                                   {% if setting.value %}checked{% endif %}>
+                            <label class="form-check-label">{{ setting.label }}</label>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="col-12">
+            <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                <i class="fas fa-save me-2"></i>Сохранить изменения
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function saveSettings() {
+        const form = document.getElementById('settingsForm');
+        const formData = new FormData(form);
+        
+        // Convert checkbox values to boolean
+        form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            formData.set(checkbox.name, checkbox.checked ? '1' : '0');
+        });
+        
+        fetch('/admin/api/settings', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            showToast('Настройки успешно сохранены');
+        })
+        .catch(error => {
+            showToast(error.message, 'error');
+        });
+    }
+</script>
+{% endblock %}

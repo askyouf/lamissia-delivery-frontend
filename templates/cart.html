@@ -1,0 +1,689 @@
+{% extends "base.html" %}
+
+{% block title %}Корзина - Доставка еды{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Корзина</h2>
+                <div>
+                    <button class="btn btn-outline-danger me-2" onclick="clearCart()">
+                        <i class="bi bi-trash me-1"></i>Очистить корзину
+                    </button>
+                    <span class="text-muted cart-items-count">0 товаров</span>
+                </div>
+            </div>
+
+            <!-- Cart Items Container -->
+            <div class="cart-items mb-4">
+                {% for item in cart_items %}
+                <div class="cart-item" data-item-id="{{ item.id }}">
+                    <div class="cart-item-image">
+                        <img src="{{ item.image_url if item.image_url else url_for('static', filename='images/no-photo.svg') }}" 
+                             alt="{{ item.name }}" 
+                             onerror="this.src='{{ url_for('static', filename='images/no-photo.svg') }}'">
+                    </div>
+                    <div class="cart-item-details">
+                        <h3>{{ item.name }}</h3>
+                        <p class="price" data-price="{{ item.price }}">{{ item.price }} ₽</p>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn decrease" data-item-id="{{ item.id }}">-</button>
+                        <span class="quantity">{{ item.quantity }}</span>
+                        <button class="quantity-btn increase" data-item-id="{{ item.id }}">+</button>
+                    </div>
+                    <div class="cart-item-total">
+                        <p class="item-total" data-item-id="{{ item.id }}">{{ item.price * item.quantity }} ₽</p>
+                    </div>
+                    <button class="remove-item" data-item-id="{{ item.id }}" title="Удалить">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="empty-cart-message text-center py-5" style="display: none;">
+                <i class="bi bi-cart-x display-1 text-muted mb-4"></i>
+                <h3>Ваша корзина пуста</h3>
+                <p class="text-muted mb-4">Добавьте что-нибудь из нашего меню</p>
+                <a href="/menu" class="btn btn-primary btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i>Перейти в меню
+                </a>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 order-summary">
+                <div class="card-body p-4">
+                    <h4 class="mb-4">Сводка заказа</h4>
+                    
+                    <!-- Delivery Method -->
+                    <div class="mb-4">
+                        <h5 class="section-title">Способ доставки</h5>
+                        <div class="delivery-options">
+                            <div class="delivery-option">
+                                <input class="form-check-input" type="radio" name="deliveryMethod" id="pickup" value="pickup" checked>
+                                <label class="delivery-label" for="pickup">
+                                    <div class="delivery-icon">
+                                        <i class="bi bi-shop"></i>
+                                    </div>
+                                    <div class="delivery-info">
+                                        <span class="delivery-name">Самовывоз</span>
+                                        <span class="delivery-price text-success">Бесплатно</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="delivery-option">
+                                <input class="form-check-input" type="radio" name="deliveryMethod" id="delivery" value="delivery">
+                                <label class="delivery-label" for="delivery">
+                                    <div class="delivery-icon">
+                                        <i class="bi bi-truck"></i>
+                                    </div>
+                                    <div class="delivery-info">
+                                        <span class="delivery-name">Доставка</span>
+                                        <span class="delivery-price">200 ₽ (бесплатно от 2500 ₽)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="mb-4">
+                        <h5 class="section-title">Способ оплаты</h5>
+                        <div class="payment-options">
+                            <div class="payment-option">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="cash" value="cash" checked>
+                                <label class="payment-label" for="cash">
+                                    <div class="payment-icon">
+                                        <i class="bi bi-cash"></i>
+                                    </div>
+                                    <div class="payment-info">
+                                        <span class="payment-name">Наличными</span>
+                                        <span class="payment-desc">При получении</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="payment-option">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="card" value="card">
+                                <label class="payment-label" for="card">
+                                    <div class="payment-icon">
+                                        <i class="bi bi-credit-card"></i>
+                                    </div>
+                                    <div class="payment-info">
+                                        <span class="payment-name">Картой</span>
+                                        <span class="payment-desc">При получении</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Total -->
+                    <div class="border-top pt-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Сумма</span>
+                            <span class="subtotal">0 ₽</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Доставка</span>
+                            <span class="delivery-cost">0 ₽</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="fw-bold">Итого</span>
+                            <span class="fw-bold total-amount">0 ₽</span>
+                        </div>
+                        <button class="btn btn-primary w-100 py-3 rounded-3" onclick="placeOrder()">
+                            Оформить заказ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Стили для заголовков секций */
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1.2rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), #ff8f59);
+        border-radius: 2px;
+    }
+
+    /* Стили для опций доставки */
+    .delivery-options,
+    .payment-options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .delivery-option,
+    .payment-option {
+        position: relative;
+    }
+
+    .delivery-label,
+    .payment-label {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: #fff;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .delivery-option input:checked + .delivery-label,
+    .payment-option input:checked + .payment-label {
+        border-color: var(--primary-color);
+        background: rgba(var(--primary-color-rgb), 0.05);
+    }
+
+    .delivery-icon,
+    .payment-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        background: rgba(var(--primary-color-rgb), 0.1);
+        border-radius: 50%;
+        margin-right: 1rem;
+    }
+
+    .delivery-icon i,
+    .payment-icon i {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+    }
+
+    .delivery-info,
+    .payment-info {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .delivery-name,
+    .payment-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.2rem;
+    }
+
+    .delivery-price,
+    .payment-desc {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .delivery-price.text-success {
+        color: #28a745 !important;
+        font-weight: 600;
+    }
+
+    /* Скрываем стандартные радио-кнопки */
+    .delivery-option input[type="radio"],
+    .payment-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+    /* Добавляем кастомный индикатор */
+    .delivery-label::before,
+    .payment-label::before {
+        content: '';
+        position: absolute;
+        right: 1rem;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #dee2e6;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .delivery-option input:checked + .delivery-label::before,
+    .payment-option input:checked + .payment-label::before {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        box-shadow: inset 0 0 0 4px #fff;
+    }
+
+    /* Ховер эффекты */
+    .delivery-label:hover,
+    .payment-label:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Стили для карточек товаров в корзине */
+    .cart-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: #fff;
+        border-radius: 0.75rem;
+        margin-bottom: 1rem;
+        gap: 1rem;
+    }
+
+    .cart-item-image {
+        width: 90px;
+        height: 90px;
+        flex-shrink: 0;
+    }
+
+    .cart-item-image img {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        object-fit: contain;
+        background-color: #f8f9fa;
+    }
+
+    .cart-item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .cart-item-details h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .cart-item-details .price {
+        display: none;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-right: 0.5rem;
+    }
+
+    .quantity-btn {
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: #f8f9fa;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2c3e50;
+        font-size: 1rem;
+        padding: 0;
+    }
+
+    .quantity {
+        margin: 0;
+        min-width: 24px;
+        text-align: center;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .cart-item-total {
+        display: flex;
+        align-items: center;
+        margin-right: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .cart-item-total p {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--primary-color);
+    }
+
+    .remove-item {
+        background: none;
+        border: none;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #cbd5e1;
+        font-size: 1.25rem;
+        padding: 0;
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+        .cart-item {
+            gap: 0.75rem;
+            padding: 0.75rem;
+        }
+
+        .cart-item-image {
+            width: 70px;
+            height: 70px;
+        }
+
+        .cart-item-details h3 {
+            font-size: 0.95rem;
+        }
+
+        .quantity-controls {
+            gap: 0.75rem;
+        }
+
+        .quantity-btn {
+            width: 22px;
+            height: 22px;
+            font-size: 0.9rem;
+        }
+
+        .cart-item-total p {
+            font-size: 0.95rem;
+        }
+
+        .remove-item {
+            width: 22px;
+            height: 22px;
+            font-size: 1.1rem;
+        }
+    }
+</style>
+
+<script>
+// Глобальная переменная для корзины
+let cart = {};
+
+// Обработчик изменения способа доставки
+document.querySelectorAll('input[name="deliveryMethod"]').forEach(input => {
+    input.addEventListener('change', function() {
+        localStorage.setItem('deliveryMethod', this.value);
+        updateTotalAmount(calculateSubtotal(cart));
+    });
+});
+
+// При загрузке страницы устанавливаем сохраненный способ доставки
+document.addEventListener('DOMContentLoaded', function() {
+    const savedDeliveryMethod = localStorage.getItem('deliveryMethod');
+    if (savedDeliveryMethod) {
+        const radioButton = document.querySelector(`input[name="deliveryMethod"][value="${savedDeliveryMethod}"]`);
+        if (radioButton) {
+            radioButton.checked = true;
+        }
+    }
+    loadCartItems();
+});
+
+// Функция загрузки товаров корзины
+function loadCartItems() {
+    // Получаем корзину из localStorage
+    const cartData = localStorage.getItem('cart');
+    if (!cartData) {
+        cart = {};
+        updateCartDisplay();
+        return;
+    }
+
+    try {
+        cart = JSON.parse(cartData);
+        
+        // Проверяем, есть ли товары в корзине
+        const hasItems = Object.keys(cart).length > 0;
+        
+        if (hasItems) {
+            // Скрываем сообщение о пустой корзине
+            document.querySelector('.empty-cart-message').style.display = 'none';
+            document.querySelector('.cart-items').style.display = 'block';
+            
+            // Отображаем товары
+            renderCart();
+        } else {
+            // Показываем сообщение о пустой корзине
+            document.querySelector('.empty-cart-message').style.display = 'block';
+            document.querySelector('.cart-items').style.display = 'none';
+        }
+        
+        // Обновляем счетчик товаров
+        updateCartCounter();
+        // Обновляем общую сумму
+        updateCartTotal();
+    } catch (error) {
+        console.error('Error loading cart:', error);
+        cart = {};
+        updateCartDisplay();
+    }
+}
+
+// Функция отрисовки корзины
+function renderCart() {
+    const cartItemsContainer = document.querySelector('.cart-items');
+    cartItemsContainer.innerHTML = '';
+    
+    Object.values(cart).forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'cart-item';
+        itemElement.dataset.itemId = item.id;
+        
+        itemElement.innerHTML = `
+            <div class="cart-item-image">
+                <img src="${item.image_url || '/static/images/no-photo.svg'}" 
+                     alt="${item.name}" 
+                     onerror="this.src='/static/images/no-photo.svg'">
+            </div>
+            <div class="cart-item-details">
+                <h3>${item.name}</h3>
+                <p class="price" data-price="${item.price}">${item.price} ₽</p>
+            </div>
+            <div class="quantity-controls">
+                <button class="quantity-btn decrease" data-item-id="${item.id}">-</button>
+                <span class="quantity">${item.quantity}</span>
+                <button class="quantity-btn increase" data-item-id="${item.id}">+</button>
+            </div>
+            <div class="cart-item-total">
+                <p class="item-total" data-item-id="${item.id}">${item.price * item.quantity} ₽</p>
+            </div>
+            <button class="remove-item" data-item-id="${item.id}" title="Удалить">
+                <i class="bi bi-x"></i>
+            </button>
+        `;
+        
+        cartItemsContainer.appendChild(itemElement);
+        
+        // Добавляем обработчики событий для кнопок
+        const decreaseBtn = itemElement.querySelector('.decrease');
+        const increaseBtn = itemElement.querySelector('.increase');
+        const removeBtn = itemElement.querySelector('.remove-item');
+        
+        decreaseBtn.addEventListener('click', () => updateQuantity(item.id, -1));
+        increaseBtn.addEventListener('click', () => updateQuantity(item.id, 1));
+        removeBtn.addEventListener('click', () => removeFromCart(item.id));
+    });
+    
+    // Обновляем отображение количества товаров
+    const itemsCount = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+    document.querySelector('.cart-items-count').textContent = getItemsText(itemsCount);
+    
+    // Обновляем общую сумму
+    updateTotalAmount(calculateSubtotal(cart));
+}
+
+// Функция обновления количества товара
+function updateQuantity(productId, change) {
+    if (cart[productId]) {
+        const newQuantity = cart[productId].quantity + change;
+        
+        if (newQuantity <= 0) {
+            removeFromCart(productId);
+            return;
+        }
+        
+        cart[productId].quantity = newQuantity;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Обновляем отображение количества
+        const cartItem = document.querySelector(`.cart-item[data-item-id="${productId}"]`);
+        if (cartItem) {
+            const quantityElement = cartItem.querySelector('.quantity');
+            const totalElement = cartItem.querySelector('.item-total');
+            const price = cart[productId].price;
+            
+            if (quantityElement) {
+                quantityElement.textContent = newQuantity;
+            }
+            
+            if (totalElement) {
+                totalElement.textContent = `${price * newQuantity} ₽`;
+            }
+        }
+        
+        // Обновляем счетчики и суммы
+        updateCartCounter();
+        updateTotalAmount(calculateSubtotal(cart));
+    }
+}
+
+// Функция подсчета общей суммы
+function calculateSubtotal(cart) {
+    return Object.values(cart).reduce((total, item) => {
+        return total + (parseFloat(item.price) * parseInt(item.quantity));
+    }, 0);
+}
+
+// Функция обновления итоговой суммы с учетом доставки
+function updateTotalAmount(subtotal) {
+    const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
+    const deliveryCost = deliveryMethod === 'pickup' ? 0 : 200;
+    const total = subtotal + deliveryCost;
+    
+    const subtotalElement = document.querySelector('.subtotal');
+    if (subtotalElement) {
+        subtotalElement.textContent = `${subtotal} ₽`;
+    }
+    
+    const deliveryCostElement = document.querySelector('.delivery-cost');
+    if (deliveryCostElement) {
+        deliveryCostElement.textContent = deliveryCost === 0 ? 'Бесплатно' : `${deliveryCost} ₽`;
+    }
+    
+    const totalElement = document.querySelector('.total-amount');
+    if (totalElement) {
+        totalElement.textContent = `${total} ₽`;
+    }
+}
+
+// Функция удаления товара из корзины
+function removeFromCart(productId) {
+    if (cart[productId]) {
+        delete cart[productId];
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Удаляем элемент из DOM
+        const itemElement = document.querySelector(`.cart-item[data-item-id="${productId}"]`);
+        if (itemElement) {
+            itemElement.remove();
+        }
+        
+        // Проверяем, осталось ли что-то в корзине
+        if (Object.keys(cart).length === 0) {
+            document.querySelector('.empty-cart-message').style.display = 'block';
+            document.querySelector('.cart-items').style.display = 'none';
+        }
+        
+        // Обновляем счетчики и суммы
+        updateCartCounter();
+        updateTotalAmount(calculateSubtotal(cart));
+    }
+}
+
+// Функция обновления счетчика товаров
+function updateCartCounter() {
+    const itemsCount = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+    const counterElement = document.querySelector('.cart-items-count');
+    if (counterElement) {
+        counterElement.textContent = getItemsText(itemsCount);
+    }
+}
+
+// Функция обновления общей суммы
+function updateCartTotal() {
+    const subtotal = calculateSubtotal(cart);
+    updateTotalAmount(subtotal);
+}
+
+// Вспомогательная функция для склонения слов
+function getItemsText(count) {
+    return `${count} ${getWordForm(count, ['товар', 'товара', 'товаров'])}`;
+}
+
+// Функция для склонения слов
+function getWordForm(number, words) {
+    const cases = [2, 0, 1, 1, 1, 2];
+    return words[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
+}
+
+// Функция очистки корзины
+function clearCart() {
+    cart = {};
+    localStorage.removeItem('cart');
+    document.querySelector('.empty-cart-message').style.display = 'block';
+    document.querySelector('.cart-items').style.display = 'none';
+    updateCartCounter();
+    updateCartTotal();
+}
+
+// Функция для оформления заказа
+function placeOrder() {
+    // Проверяем, есть ли товары в корзине
+    const cart = JSON.parse(localStorage.getItem('cart') || '{}');
+    if (Object.keys(cart).length === 0) {
+        alert('Ваша корзина пуста');
+        return;
+    }
+    
+    // Перенаправляем на страницу оформления заказа
+    window.location.href = '/checkout';
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Загружаем товары корзины
+    loadCartItems();
+    
+    // Добавляем обработчик изменения способа доставки
+    document.querySelectorAll('input[name="deliveryMethod"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const subtotal = calculateSubtotal(cart);
+            updateTotalAmount(subtotal);
+        });
+    });
+});
+</script>
+
+{% block footer %}{% endblock %}
+
+{% endblock %}

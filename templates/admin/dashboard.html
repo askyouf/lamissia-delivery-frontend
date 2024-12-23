@@ -1,0 +1,247 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Дашборд - Админ-панель{% endblock %}
+
+{% block header_title %}Дашборд{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.css" rel="stylesheet">
+<style>
+    .stats-card {
+        transition: transform 0.2s;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    .stats-icon {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin-bottom: 1rem;
+    }
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon bg-primary bg-opacity-10 text-primary mx-auto">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="stats-number text-primary">{{ total_orders }}</div>
+                    <div class="stats-label">Всего заказов</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon bg-success bg-opacity-10 text-success mx-auto">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stats-number text-success">{{ new_orders }}</div>
+                    <div class="stats-label">Новых заказов</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon bg-info bg-opacity-10 text-info mx-auto">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="stats-number text-info">{{ total_dishes }}</div>
+                    <div class="stats-label">Блюд в меню</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon bg-warning bg-opacity-10 text-warning mx-auto">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="stats-number text-warning">{{ total_categories }}</div>
+                    <div class="stats-label">Категорий</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Orders Chart -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Статистика заказов</h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateChart('week')">Неделя</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateChart('month')">Месяц</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="ordersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Последние заказы</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for order in recent_orders %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Заказ #{{ order.id }}</h6>
+                                    <small class="text-muted">{{ order.date.strftime('%d.%m.%Y %H:%M') }}</small>
+                                </div>
+                                <span class="badge bg-{{ order.status_color }}">{{ order.status_display }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{{ url_for('admin.orders') }}" class="btn btn-sm btn-primary">
+                        Все заказы
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders by Status -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Заказы по статусам</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script>
+    // Orders Chart
+    const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+    const ordersChart = new Chart(ordersCtx, {
+        type: 'line',
+        data: {
+            labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+            datasets: [{
+                label: 'Заказы',
+                data: [12, 19, 3, 5, 2, 3, 7],
+                borderColor: '#ff6b6b',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(255, 107, 107, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Order Status Chart
+    const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+    const orderStatusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ order_stats.labels | tojson }},
+            datasets: [{
+                data: {{ order_stats.data | tojson }},
+                backgroundColor: [
+                    '#ff6b6b',
+                    '#339af0',
+                    '#51cf66',
+                    '#ffd43b',
+                    '#868e96'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    // Update chart data
+    function updateChart(period) {
+        // Here you would typically make an API call to get new data
+        // For now, we'll just simulate with random data
+        const data = Array.from({length: period === 'week' ? 7 : 30}, () => 
+            Math.floor(Math.random() * 20)
+        );
+        
+        ordersChart.data.labels = Array.from({length: data.length}, (_, i) => 
+            period === 'week' ? 
+            ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'][i] :
+            (i + 1).toString()
+        );
+        
+        ordersChart.data.datasets[0].data = data;
+        ordersChart.update();
+    }
+</script>
+{% endblock %}
