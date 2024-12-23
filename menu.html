@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Меню - Доставка еды</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Lamissia Delivery</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="menu.html">Меню</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="promotions.html">Акции</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="cart.html" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-cart"></i> Корзина <span class="cart-count">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="container py-5">
+        <!-- Категории меню -->
+        <div class="menu-categories mb-4">
+            <button class="btn btn-outline-primary active" data-category="all">Все</button>
+            <button class="btn btn-outline-primary" data-category="pizza">Пицца</button>
+            <button class="btn btn-outline-primary" data-category="salads">Салаты</button>
+            <button class="btn btn-outline-primary" data-category="hot">Горячие блюда</button>
+            <button class="btn btn-outline-primary" data-category="breakfast">Завтраки</button>
+            <button class="btn btn-outline-primary" data-category="desserts">Десерты</button>
+        </div>
+
+        <!-- Список блюд -->
+        <div class="row g-4" id="menuItems">
+            <!-- Пицца -->
+            <div class="col-md-6 col-lg-4 menu-item" data-category="pizza">
+                <div class="card h-100">
+                    <img src="static/uploads/dishes/pizza1-large.png" class="card-img-top" alt="Пицца Маргарита">
+                    <div class="card-body">
+                        <h5 class="card-title">Пицца Маргарита</h5>
+                        <p class="card-text">Томатный соус, моцарелла, базилик</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">599 ₽</span>
+                            <button class="btn btn-primary add-to-cart" data-id="pizza1">В корзину</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Салаты -->
+            <div class="col-md-6 col-lg-4 menu-item" data-category="salads">
+                <div class="card h-100">
+                    <img src="static/uploads/dishes/salad1-large.png" class="card-img-top" alt="Цезарь">
+                    <div class="card-body">
+                        <h5 class="card-title">Салат Цезарь</h5>
+                        <p class="card-text">Куриное филе, салат романо, пармезан, соус цезарь</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">459 ₽</span>
+                            <button class="btn btn-primary add-to-cart" data-id="salad1">В корзину</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Горячие блюда -->
+            <div class="col-md-6 col-lg-4 menu-item" data-category="hot">
+                <div class="card h-100">
+                    <img src="static/uploads/dishes/goryachee1-large.png" class="card-img-top" alt="Стейк">
+                    <div class="card-body">
+                        <h5 class="card-title">Стейк из говядины</h5>
+                        <p class="card-text">Стейк из мраморной говядины с овощами гриль</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">1299 ₽</span>
+                            <button class="btn btn-primary add-to-cart" data-id="hot1">В корзину</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Завтраки -->
+            <div class="col-md-6 col-lg-4 menu-item" data-category="breakfast">
+                <div class="card h-100">
+                    <img src="static/uploads/dishes/zavtrak1-large.png" class="card-img-top" alt="Омлет">
+                    <div class="card-body">
+                        <h5 class="card-title">Омлет с овощами</h5>
+                        <p class="card-text">Пышный омлет с томатами, шпинатом и сыром</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">329 ₽</span>
+                            <button class="btn btn-primary add-to-cart" data-id="breakfast1">В корзину</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Десерты -->
+            <div class="col-md-6 col-lg-4 menu-item" data-category="desserts">
+                <div class="card h-100">
+                    <img src="static/uploads/dishes/desert2-large.png" class="card-img-top" alt="Тирамису">
+                    <div class="card-body">
+                        <h5 class="card-title">Тирамису</h5>
+                        <p class="card-text">Классический итальянский десерт</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price">399 ₽</span>
+                            <button class="btn btn-primary add-to-cart" data-id="dessert1">В корзину</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Контакты</h5>
+                    <p>Телефон: +7 (XXX) XXX-XX-XX</p>
+                    <p>Email: info@lamissia.ru</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Время работы</h5>
+                    <p>Ежедневно с 10:00 до 23:00</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Следите за нами</h5>
+                    <div class="social-links">
+                        <a href="#" class="me-2"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="me-2"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="me-2"><i class="bi bi-telegram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="static/js/main.js"></script>
+    <script>
+        // Фильтрация по категориям
+        document.querySelectorAll('.menu-categories .btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Убираем активный класс у всех кнопок
+                document.querySelectorAll('.menu-categories .btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Добавляем активный класс нажатой кнопке
+                button.classList.add('active');
+                
+                const category = button.dataset.category;
+                
+                // Показываем/скрываем элементы меню
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    if (category === 'all' || item.dataset.category === category) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Добавление в корзину
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', () => {
+                const cartCount = document.querySelector('.cart-count');
+                cartCount.textContent = parseInt(cartCount.textContent) + 1;
+                alert('Товар добавлен в корзину!');
+            });
+        });
+    </script>
+</body>
+</html>
